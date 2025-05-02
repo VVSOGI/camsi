@@ -33,7 +33,7 @@ export class Wave {
 
     let prevX = this.points[0].x;
     let prevY = this.points[0].y;
-    ctx.moveTo(prevX, prevY);
+    ctx.moveTo(prevX - 300, prevY);
 
     for (let i = 1; i < this.totalPoints; i++) {
       if (i < this.totalPoints - 1) {
@@ -43,13 +43,13 @@ export class Wave {
       const cx = (prevX + this.points[i].x) / 2;
       const cy = (prevY + this.points[i].y) / 2;
 
-      ctx.lineTo(cx, cy);
+      ctx.quadraticCurveTo(prevX, prevY, cx, cy);
 
       prevX = this.points[i].x;
       prevY = this.points[i].y;
     }
 
-    ctx.lineTo(prevX, prevY);
+    ctx.quadraticCurveTo(prevX, prevY, prevX + 300, prevY);
     ctx.lineTo(this.stageWidth, this.stageHeight);
     ctx.lineTo(this.points[0].x, this.stageHeight);
     ctx.fill();
