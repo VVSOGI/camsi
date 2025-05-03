@@ -4,11 +4,11 @@ export class Waves {
   constructor() {
     this.totalPoints = 8;
 
-    this.colors = ["rgba(0,199,235,0.4)", "rgba(0,146,199,0.4)", "rgba(0,87,158,0.4)"];
+    this.colors = ["#0084ff", "#e77272", "#17b3e6"];
     this.waves = [];
 
     for (let i = 0; i < this.colors.length; i++) {
-      const wave = new Wave(i, this.totalPoints, this.colors[0]);
+      const wave = new Wave(i, this.totalPoints, this.colors[i]);
       this.waves[i] = wave;
     }
   }
