@@ -46,6 +46,7 @@ export class Hill {
     }
 
     ctx.moveTo(current.x, current.y);
+    const dots = [];
 
     for (let i = 1; i < this.points.length; i++) {
       current = this.points[i];
@@ -55,6 +56,15 @@ export class Hill {
       const cy = Math.ceil(prev.y + current.y) / 2;
 
       ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
+
+      dots.push({
+        x1: prevCx,
+        y1: prevCy,
+        x2: prev.x,
+        y2: prev.y,
+        x3: cx,
+        y3: cy,
+      });
 
       prev = current;
       prevCx = cx;
@@ -66,6 +76,8 @@ export class Hill {
     ctx.lineTo(this.points[0].x, this.stageHeight);
     ctx.fill();
     ctx.closePath();
+
+    return dots;
   };
 
   getY = () => {

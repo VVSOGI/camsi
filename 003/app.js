@@ -35,8 +35,9 @@ class App {
     requestAnimationFrame(this.animate);
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
 
+    let dots;
     for (const hill of this.hills) {
-      hill.draw(this.ctx);
+      dots = hill.draw(this.ctx);
     }
   };
 }
