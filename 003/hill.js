@@ -21,6 +21,8 @@ export class Hill {
   };
 
   draw = (ctx) => {
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
     let current = this.points[0];
     let prev = current;
     let prevCx = prev.x;
@@ -39,9 +41,12 @@ export class Hill {
 
     const lastPoint = this.points[this.points.length - 1];
 
-    if (lastPoint.x > this.stageWidth + this.gap) {
+    if (lastPoint.x > this.stageWidth + this.gap * 2) {
       this.points.pop();
     }
+
+    ctx.moveTo(current.x, current.y);
+    const dots = [];
 
     for (let i = 1; i < this.points.length; i++) {
       current = this.points[i];
@@ -49,28 +54,30 @@ export class Hill {
 
       const cx = Math.ceil(prev.x + current.x) / 2;
       const cy = Math.ceil(prev.y + current.y) / 2;
-      ctx.beginPath();
-      ctx.arc(prevCx, prevCy, 10, 0, Math.PI * 2);
-      ctx.fillStyle = "green";
-      ctx.fill();
-      ctx.closePath();
 
-      ctx.beginPath();
-      ctx.arc(current.x, current.y, 10, 0, Math.PI * 2);
-      ctx.fillStyle = "red";
-      ctx.fill();
-      ctx.closePath();
+      ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
 
-      ctx.beginPath();
-      ctx.arc(cx, cy, 10, 0, Math.PI * 2);
-      ctx.fillStyle = "blue";
-      ctx.fill();
-      ctx.closePath();
+      dots.push({
+        x1: prevCx,
+        y1: prevCy,
+        x2: prev.x,
+        y2: prev.y,
+        x3: cx,
+        y3: cy,
+      });
 
       prev = current;
       prevCx = cx;
       prevCy = cy;
     }
+
+    ctx.lineTo(prev.x, prev.y);
+    ctx.lineTo(this.stageWidth, this.stageHeight);
+    ctx.lineTo(this.points[0].x, this.stageHeight);
+    ctx.fill();
+    ctx.closePath();
+
+    return dots;
   };
 
   getY = () => {
