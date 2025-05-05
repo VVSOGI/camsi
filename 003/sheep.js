@@ -37,8 +37,9 @@ export class Sheep {
   };
 
   animate = (ctx, dots) => {
-    this.x = 700;
-    this.y = 300;
+    this.x -= this.speed;
+    const current = this.getY(this.x, dots);
+    this.y = current.y;
 
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -54,5 +55,40 @@ export class Sheep {
       this.sheepHeight
     );
     ctx.restore();
+  };
+
+  getY = (x, dots) => {
+    for (let i = 1; i < dots.length; i++) {
+      if (x >= dots[i].x1 && x <= dots[i].x3) {
+        return this.getY2(x, dots[i]);
+      }
+    }
+  };
+
+  getY2 = (x, dot) => {
+    let pt = this.getPointOnQuad(dot.x1, dot.y1, dot.x2, dot.y2, dot.x3, dot.y3, 0);
+    let prevX = pt.x;
+    for (let i = 1; i < 200; i++) {
+      const t = i / 200;
+      pt = this.getPointOnQuad(dot.x1, dot.y1, dot.x2, dot.y2, dot.x3, dot.y3, t);
+      if (x >= prevX && x <= pt.x) {
+        return pt;
+      }
+
+      prevX = pt.x;
+    }
+
+    return pt;
+  };
+
+  getPointOnQuad = (x1, y1, x2, y2, x3, y3, t) => {
+    return {
+      x: this.getQuadPoint(x1, x2, x3, t),
+      y: this.getQuadPoint(y1, y2, y3, t),
+    };
+  };
+
+  getQuadPoint = (p0, p1, p2, t) => {
+    return (1 - t) * (1 - t) * p0 + 2 * (1 - t) * t * p1 + t * t * p2;
   };
 }
