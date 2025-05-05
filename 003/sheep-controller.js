@@ -29,8 +29,18 @@ export class SheepController {
 
   draw = (ctx, t, dots) => {
     if (this.isLoaded) {
+      this.cur += 1;
+      if (this.cur > 200) {
+        this.cur = 0;
+        this.addSheep();
+      }
+
       for (let i = 0; i < this.items.length; i++) {
-        this.items[i].draw(ctx, t, dots);
+        if (this.items[i].x < -this.items[i].imgWidth) {
+          this.items.splice(i, 1);
+        } else {
+          this.items[i].draw(ctx, t, dots);
+        }
       }
     }
   };
