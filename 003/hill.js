@@ -25,8 +25,8 @@ export class Hill {
     ctx.fillStyle = this.color;
     let current = this.points[0];
     let prev = current;
-    let prevCx = prev.x;
-    let prevCy = prev.y;
+    let prevCx = current.x;
+    let prevCy = current.y;
 
     current.x += this.speed;
     if (current.x > -this.gap) {
@@ -41,8 +41,8 @@ export class Hill {
 
     const lastPoint = this.points[this.points.length - 1];
 
-    if (lastPoint.x > this.stageWidth + this.gap * 2) {
-      this.points.pop();
+    if (lastPoint.x > this.stageWidth + this.gap * 4) {
+      // this.points.pop();
     }
 
     ctx.moveTo(current.x, current.y);
@@ -52,8 +52,8 @@ export class Hill {
       current = this.points[i];
       current.x += this.speed;
 
-      const cx = Math.ceil(prev.x + current.x) / 2;
-      const cy = Math.ceil(prev.y + current.y) / 2;
+      const cx = (prev.x + current.x) / 2;
+      const cy = (prev.y + current.y) / 2;
 
       ctx.quadraticCurveTo(prev.x, prev.y, cx, cy);
 
