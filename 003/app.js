@@ -13,7 +13,7 @@ class App {
       new Hill("#628b4b", 1.4, 6),
     ];
 
-    this.sheepController = new SheepController();
+    this.sheepController = new SheepController(this.canvas);
 
     window.addEventListener("resize", this.resize);
     this.resize();

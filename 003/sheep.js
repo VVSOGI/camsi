@@ -13,10 +13,32 @@ export class Sheep {
 
     this.x = stageWidth + this.sheepWidth;
     this.y = 0;
-    this.speed = Math.random() + 1;
+    this.speed = Math.random() + 0.5;
 
     this.fps = 24;
     this.fpsTime = 1000 / this.fps;
+
+    this.isClicked = false;
+    this.clickCallback = null;
+  }
+
+  handleClick(x, y) {
+    this.isClicked = true;
+
+    if (this.clickCallback) {
+      this.clickCallback(this);
+    }
+  }
+
+  setClickCallback(callback) {
+    this.clickCallback = callback;
+  }
+
+  isPointInside(x, y) {
+    const centerX = this.x - this.sheepHalfWidth;
+    const centerY = this.y - (this.sheepHeight / 2 + 20);
+
+    return x >= centerX && x <= centerX + this.sheepWidth && y >= centerY && y <= centerY + this.sheepHeight;
   }
 
   draw = (ctx, t, dots) => {
@@ -45,6 +67,11 @@ export class Sheep {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(current.rotation);
+    ctx.beginPath();
+    ctx.rect(-this.sheepHalfWidth, -(this.sheepHeight / 2 + 20), this.sheepWidth, this.sheepHeight);
+    ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
+    ctx.fill();
+
     ctx.drawImage(
       this.img,
       this.imgWidth * this.curFrame,
@@ -76,6 +103,8 @@ export class Sheep {
       if (x >= prevX && x <= point.x) {
         return point;
       }
+
+      prevX = point.x;
     }
 
     return point;
