@@ -42,7 +42,7 @@ export class Hill {
     const lastPoint = this.points[this.points.length - 1];
 
     if (lastPoint.x > this.stageWidth + this.gap * 4) {
-      // this.points.pop();
+      this.points.pop();
     }
 
     ctx.moveTo(current.x, current.y);
@@ -81,7 +81,7 @@ export class Hill {
   };
 
   getY = () => {
-    const min = this.stageHeight / 8;
+    const min = this.stageHeight / (this.total - 4);
     const max = this.stageHeight - min;
     return min + Math.random() * max;
   };
