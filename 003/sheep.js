@@ -1,6 +1,7 @@
 export class Sheep {
-  constructor(img, stageWidth) {
+  constructor(img, shiverImg, stageWidth) {
     this.img = img;
+    this.shiverImg = shiverImg;
     this.totalFrame = 8;
     this.curFrame = 0;
 
@@ -14,24 +15,21 @@ export class Sheep {
     this.x = stageWidth + this.sheepWidth;
     this.y = 0;
     this.speed = Math.random() + 0.5;
+    this.rotation = 0;
 
     this.fps = 24;
     this.fpsTime = 1000 / this.fps;
 
-    this.isClicked = false;
-    this.clickCallback = null;
+    this.isGrabbed = false;
+    this.grabCallback = null;
   }
 
-  handleClick(x, y) {
-    this.isClicked = true;
-
-    if (this.clickCallback) {
-      this.clickCallback(this);
-    }
+  handleGrabUp() {
+    this.isGrabbed = true;
   }
 
-  setClickCallback(callback) {
-    this.clickCallback = callback;
+  handleGrabDown() {
+    this.isGrabbed = false;
   }
 
   isPointInside(x, y) {
@@ -41,7 +39,25 @@ export class Sheep {
     return x >= centerX && x <= centerX + this.sheepWidth && y >= centerY && y <= centerY + this.sheepHeight;
   }
 
-  draw = (ctx, t, dots) => {
+  animateSheep = (ctx, img, x, y, rotation) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.drawImage(
+      img,
+      this.imgWidth * this.curFrame,
+      0,
+      this.imgWidth,
+      this.imgHeight,
+      -this.sheepHalfWidth,
+      -this.sheepHeight + 20,
+      this.sheepWidth,
+      this.sheepHeight
+    );
+    ctx.restore();
+  };
+
+  draw = (ctx, t, dots, mouseX, mouseY) => {
     if (!this.time) {
       this.time = t;
     }
@@ -55,35 +71,25 @@ export class Sheep {
       }
     }
 
-    this.animate(ctx, dots);
+    if (this.curFrame === 9) {
+      console.log(123);
+    }
+    this.animate(ctx, dots, mouseX, mouseY);
   };
 
-  animate = (ctx, dots) => {
-    this.x -= this.speed;
+  animate = (ctx, dots, mouseX, mouseY) => {
+    if (this.isGrabbed) {
+      this.x = mouseX;
+      this.y = mouseY;
+      this.animateSheep(ctx, this.shiverImg, this.x, this.y, 0);
+      return;
+    }
+
     const current = this.getY(this.x, dots);
-    if (!current) return;
+    this.x -= this.speed;
     this.y = current.y;
 
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(current.rotation);
-    ctx.beginPath();
-    ctx.rect(-this.sheepHalfWidth, -(this.sheepHeight / 2 + 20), this.sheepWidth, this.sheepHeight);
-    ctx.fillStyle = "rgba(255, 0, 0, 0.8)";
-    ctx.fill();
-
-    ctx.drawImage(
-      this.img,
-      this.imgWidth * this.curFrame,
-      0,
-      this.imgWidth,
-      this.imgHeight,
-      -this.sheepHalfWidth,
-      -this.sheepHeight + 20,
-      this.sheepWidth,
-      this.sheepHeight
-    );
-    ctx.restore();
+    this.animateSheep(ctx, this.img, this.x, this.y, this.rotation);
   };
 
   getY = (x, dots) => {
@@ -92,6 +98,11 @@ export class Sheep {
         return this.getY2(x, dots[i]);
       }
     }
+
+    return {
+      x: this.x,
+      y: this.y,
+    };
   };
 
   getY2 = (x, dot) => {
@@ -114,11 +125,11 @@ export class Sheep {
     const tx = this.getQuadTangent(x1, x2, x3, t);
     const ty = this.getQuadTangent(y1, y2, y3, t);
     const rotation = Math.atan2(ty, tx);
+    this.rotation = rotation;
 
     return {
       x: this.getQuadPoint(x1, x2, x3, t),
       y: this.getQuadPoint(y1, y2, y3, t),
-      rotation,
     };
   };
 
