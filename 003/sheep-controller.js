@@ -102,18 +102,15 @@ export class SheepController {
   draw = (ctx, t, dots) => {
     if (this.isLoaded) {
       this.cur += 1;
-      if (this.cur > 500) {
+      if (this.cur > 300) {
         this.cur = 0;
         this.addSheep();
       }
 
       for (let i = 0; i < this.sheeps.length; i++) {
         const item = this.sheeps[i];
-        if (item.x < -item.imgWidth) {
-          this.sheeps.splice(i, 1);
-        } else {
-          item.draw(ctx, t, dots, this.mouseX, this.mouseY);
-        }
+        if (item.x < -item.sheepWidth) this.sheeps.splice(i, 1);
+        item.draw(ctx, t, dots, this.mouseX, this.mouseY);
       }
     }
   };

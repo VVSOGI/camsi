@@ -71,9 +71,6 @@ export class Sheep {
       }
     }
 
-    if (this.curFrame === 9) {
-      console.log(123);
-    }
     this.animate(ctx, dots, mouseX, mouseY);
   };
 
