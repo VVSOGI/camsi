@@ -1,5 +1,6 @@
 import { Hill } from "./hill.js";
 import { SheepController } from "./sheep-controller.js";
+import { Sun } from "./sun.js";
 
 class App {
   constructor() {
@@ -8,12 +9,13 @@ class App {
     document.body.appendChild(this.canvas);
 
     this.hills = [
-      new Hill("#bf1d6e", 0.2, 12), //
-      new Hill("#bf5e1d", 0.5, 8),
-      new Hill("#628b4b", 1.4, 6),
+      new Hill("#b63125", 0.2, 14), //
+      new Hill("#d09f76", 0.5, 8),
+      new Hill("#427956", 1.8, 6),
     ];
 
     this.sheepController = new SheepController(this.canvas);
+    this.sun = new Sun();
 
     window.addEventListener("resize", this.resize);
     this.resize();
@@ -28,6 +30,7 @@ class App {
     this.canvas.width = this.stageWidth * 2;
     this.canvas.height = this.stageHeight * 2;
     this.ctx.scale(2, 2);
+    this.sun.resize(this.stageWidth, this.stageHeight);
 
     for (const hill of this.hills) {
       hill.resize(this.stageWidth, this.stageHeight);
@@ -39,6 +42,7 @@ class App {
   animate = (t) => {
     requestAnimationFrame(this.animate);
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
+    this.sun.animate(t, this.ctx);
 
     let dots;
     for (const hill of this.hills) {
