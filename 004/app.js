@@ -1,3 +1,4 @@
+import { LineStorage } from "./lineStorage.js";
 import { LineButton } from "./lineButton.js";
 
 class App {
@@ -7,37 +8,41 @@ class App {
     document.body.appendChild(this.canvas);
 
     this.LineButton = new LineButton();
+    this.LineStorage = new LineStorage();
 
-    window.addEventListener("resize", this.resize);
     this.resize();
-
+    window.addEventListener("resize", this.resize);
     window.addEventListener("mousemove", this.mouseMove);
+    window.addEventListener("click", this.mouseClick);
 
     requestAnimationFrame(this.draw);
   }
 
-  handleClickLineButton = (e) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const { x1, y1, x2, y2 } = this.LineButton.position;
-
-    if (mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2) {
-      this.LineButton.active = true;
-    }
+  mouseClick = (e) => {
+    this.LineStorage.mouseClick(e);
+    this.LineButton.mouseClick(e, () => {
+      this.LineStorage.active = true;
+      this.LineStorage.tempPoint1 = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+      this.canvas.style.cursor = "none";
+    });
   };
 
   mouseMove = (e) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const { x1, y1, x2, y2 } = this.LineButton.position;
-
-    if (mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2) {
-      this.LineButton.hover = true;
-      this.canvas.style.cursor = "pointer";
-    } else {
-      this.LineButton.hover = false;
-      this.canvas.style.cursor = "";
-    }
+    this.LineStorage.mouseMove(e);
+    this.LineButton.mouseMove(
+      e,
+      () => {
+        this.LineButton.hover = true;
+        this.canvas.style.cursor = "pointer";
+      },
+      () => {
+        this.LineButton.hover = false;
+        this.canvas.style.cursor = "";
+      }
+    );
   };
 
   resize = () => {
@@ -47,6 +52,7 @@ class App {
     this.canvas.width = this.stageWidth * 2;
     this.canvas.height = this.stageHeight * 2;
 
+    this.LineStorage.resize(this.stageWidth, this.stageHeight);
     this.LineButton.resize(this.stageWidth, this.stageHeight);
 
     this.ctx.scale(2, 2);
@@ -56,6 +62,7 @@ class App {
     requestAnimationFrame(this.draw);
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
     this.LineButton.draw(this.ctx);
+    this.LineStorage.draw(this.ctx);
   };
 }
 

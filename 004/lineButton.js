@@ -5,8 +5,35 @@ export class LineButton {
     this.lineWidth = 5;
     this.fontSize = 24;
     this.hover = false;
-    this.active = false;
   }
+
+  mouseMove = (e, onHover, onLeave) => {
+    if (!this.position) return;
+
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const { x1, y1, x2, y2 } = this.position;
+
+    const isHover = mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2;
+
+    if (isHover && !this.hover) {
+      this.hover = true;
+      onHover();
+    } else if (!isHover && this.hover) {
+      this.hover = false;
+      onLeave();
+    }
+  };
+
+  mouseClick = (e, onClick) => {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const { x1, y1, x2, y2 } = this.position;
+
+    if (mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2) {
+      onClick();
+    }
+  };
 
   resize = (stageWidth, stageHeight) => {
     this.stageWidth = stageWidth;
