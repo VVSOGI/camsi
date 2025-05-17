@@ -11,7 +11,7 @@ export class SheepController {
       this.loaded();
     };
 
-    this.sheeps = [];
+    this.sheeps = new Set();
 
     this.canvas = canvas;
     this.canvas.addEventListener("mousemove", this.onMouseMove);
@@ -74,8 +74,7 @@ export class SheepController {
   };
 
   isCursorOverSheep = (x, y) => {
-    for (let i = this.sheeps.length - 1; i >= 0; i--) {
-      const sheep = this.sheeps[i];
+    for (const sheep of this.sheeps) {
       if (sheep.isPointInside(x, y)) {
         return sheep;
       }
@@ -96,7 +95,7 @@ export class SheepController {
 
   addSheep = () => {
     const sheep = new Sheep(this.img, this.shiverImg, this.stageWidth);
-    this.sheeps.push(sheep);
+    this.sheeps.add(sheep);
   };
 
   draw = (ctx, t, dots) => {
@@ -107,10 +106,9 @@ export class SheepController {
         this.addSheep();
       }
 
-      for (let i = 0; i < this.sheeps.length; i++) {
-        const item = this.sheeps[i];
-        if (item.x < -item.sheepWidth) this.sheeps.splice(i, 1);
-        item.draw(ctx, t, dots, this.mouseX, this.mouseY);
+      for (const sheep of this.sheeps) {
+        if (sheep.x < -sheep.sheepWidth) this.sheeps.delete(sheep);
+        sheep.draw(ctx, t, dots, this.mouseX, this.mouseY);
       }
     }
   };
