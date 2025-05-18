@@ -17,10 +17,9 @@ export class LineStorage {
     this.stageHeight = stageHeight = stageHeight;
   };
 
-  mouseClick = (e) => {
+  mouseClick = (mousePosition) => {
     if (this.active) {
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+      const { mouseX, mouseY } = mousePosition;
       if (!this.point1) {
         this.point1 = {
           x: mouseX,
@@ -43,10 +42,9 @@ export class LineStorage {
     }
   };
 
-  mouseMove = (e, ctx) => {
+  mouseMove = (mousePosition) => {
     if (this.active) {
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+      const { mouseX, mouseY } = mousePosition;
       if (!this.point1) {
         this.tempPoint1 = {
           x: mouseX,
