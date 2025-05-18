@@ -7,11 +7,9 @@ export class LineButton {
     this.hover = false;
   }
 
-  mouseMove = (e, onHover, onLeave) => {
+  mouseMove = (mousePosition, onHover, onLeave) => {
     if (!this.position) return;
-
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+    const { mouseX, mouseY } = mousePosition;
     const { x1, y1, x2, y2 } = this.position;
 
     const isHover = mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2;
@@ -25,9 +23,8 @@ export class LineButton {
     }
   };
 
-  mouseClick = (e, onClick) => {
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+  mouseClick = (mousePosition, onClick) => {
+    const { mouseX, mouseY } = mousePosition;
     const { x1, y1, x2, y2 } = this.position;
 
     if (mouseX >= x1 && mouseX < x2 && mouseY >= y1 && mouseY < y2) {
