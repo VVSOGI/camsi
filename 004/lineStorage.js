@@ -1,6 +1,6 @@
 export class LineStorage {
   constructor() {
-    this.active = false;
+    this.modeType = "line";
     this.tempPoint1 = null;
     this.tempPoint2 = null;
     this.point1 = null;
@@ -14,11 +14,11 @@ export class LineStorage {
 
   resize = (stageWidth, stageHeight) => {
     this.stageWidth = stageWidth;
-    this.stageHeight = stageHeight = stageHeight;
+    this.stageHeight = stageHeight;
   };
 
-  mouseClick = (mousePosition) => {
-    if (this.active) {
+  mouseClick = (usermode, mousePosition, callback) => {
+    if (usermode === this.modeType) {
       const { mouseX, mouseY } = mousePosition;
       if (!this.point1) {
         this.point1 = {
@@ -29,7 +29,6 @@ export class LineStorage {
           x: mouseX,
           y: mouseY,
         };
-
         return;
       }
 
@@ -38,12 +37,12 @@ export class LineStorage {
       this.point2 = null;
       this.tempPoint1 = null;
       this.tempPoint2 = null;
-      this.active = false;
+      callback();
     }
   };
 
-  mouseMove = (mousePosition) => {
-    if (this.active) {
+  mouseMove = (usermode, mousePosition) => {
+    if (usermode === this.modeType) {
       const { mouseX, mouseY } = mousePosition;
       if (!this.point1) {
         this.tempPoint1 = {
@@ -63,8 +62,8 @@ export class LineStorage {
     }
   };
 
-  draw = (ctx) => {
-    if (this.active && this.tempPoint1) {
+  draw = (usermode, ctx) => {
+    if (usermode === this.modeType && this.tempPoint1) {
       ctx.beginPath();
       ctx.arc(this.tempPoint1.x, this.tempPoint1.y, 2, 0, Math.PI * 2);
       ctx.fillStyle = "black";
@@ -72,7 +71,7 @@ export class LineStorage {
       ctx.closePath();
     }
 
-    if (this.active && this.tempPoint2) {
+    if (usermode === this.modeType && this.tempPoint2) {
       ctx.beginPath();
       ctx.moveTo(this.tempPoint1.x, this.tempPoint1.y);
       ctx.lineTo(this.tempPoint2.x, this.tempPoint2.y);
@@ -90,5 +89,7 @@ export class LineStorage {
       ctx.lineTo(x2, y2);
       ctx.stroke();
     }
+
+    return this.storage;
   };
 }
