@@ -9,6 +9,7 @@ class App {
     this.container.appendChild(this.canvas);
     this.usermode = "default";
     this.dragStart = null;
+    this.components = [];
 
     this.LineButton = document.querySelector(".line-button");
     this.LineStorage = new LineStorage();
@@ -18,9 +19,9 @@ class App {
     window.addEventListener("resize", this.resize);
 
     this.canvas.addEventListener("click", this.mouseClick);
-    this.canvas.addEventListener("mousemove", this.mouseMove);
-    this.canvas.addEventListener("mousedown", this.mouseDown);
-    this.canvas.addEventListener("mouseup", this.mouseUp);
+    window.addEventListener("mousemove", this.mouseMove);
+    window.addEventListener("mousedown", this.mouseDown);
+    window.addEventListener("mouseup", this.mouseUp);
 
     this.LineButton.addEventListener("click", (e) => {
       this.usermode = "line";
@@ -47,18 +48,25 @@ class App {
 
   mouseDown = (e) => {
     const mousePosition = this.getMousePoint(e);
+    const { mouseX, mouseY } = mousePosition;
 
-    if (this.usermode === "default") {
+    for (const component of this.components) {
+      component.drag = false;
+    }
+
+    if (mouseX >= 0 && mouseY >= 0 && this.usermode === "default") {
       this.usermode = "drag";
       this.dragStart = mousePosition;
+      this.Drag.tempPoint = null;
     }
   };
 
   mouseClick = (e) => {
     const mousePosition = this.getMousePoint(e);
 
-    this.LineStorage.mouseClick(this.usermode, mousePosition, () => {
+    this.LineStorage.mouseClick(this.usermode, mousePosition, (line) => {
       this.usermode = "default";
+      this.components.push(line);
     });
   };
 
@@ -88,10 +96,22 @@ class App {
   draw = (t) => {
     requestAnimationFrame(this.draw);
     this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
-    const storage = this.LineStorage.draw(this.usermode, this.ctx);
+    this.LineStorage.draw(this.usermode, this.ctx);
+
+    for (const component of this.components) {
+      component.draw(this.ctx);
+    }
 
     if (this.usermode === "drag") {
-      this.Drag.draw(this.ctx, this.dragStart);
+      const range = this.Drag.draw(this.ctx, this.dragStart);
+      if (!range) return;
+
+      const { x1, y1, x2, y2 } = range;
+      for (const component of this.components) {
+        if (component.x1 >= x1 && component.x2 <= x2 && component.y1 >= y1 && component.y2 <= y2) {
+          component.drag = true;
+        }
+      }
     }
   };
 }
