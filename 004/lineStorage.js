@@ -1,3 +1,5 @@
+import { Line } from "./line.js";
+
 export class LineStorage {
   constructor() {
     this.modeType = "line";
@@ -32,12 +34,13 @@ export class LineStorage {
         return;
       }
 
-      this.storage.add([this.point1.x, this.point1.y, this.tempPoint2.x, this.tempPoint2.y]);
+      const line = new Line(this.point1.x, this.point1.y, this.tempPoint2.x, this.tempPoint2.y);
+      this.storage.add(line);
       this.point1 = null;
       this.point2 = null;
       this.tempPoint1 = null;
       this.tempPoint2 = null;
-      callback();
+      callback(line);
     }
   };
 
@@ -73,23 +76,18 @@ export class LineStorage {
 
     if (usermode === this.modeType && this.tempPoint2) {
       ctx.beginPath();
+      ctx.arc(this.tempPoint2.x, this.tempPoint2.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "black";
+      ctx.closePath();
+
+      ctx.beginPath();
       ctx.moveTo(this.tempPoint1.x, this.tempPoint1.y);
       ctx.lineTo(this.tempPoint2.x, this.tempPoint2.y);
       ctx.stroke();
-
-      ctx.arc(this.tempPoint2.x, this.tempPoint2.y, 2, 0, Math.PI * 2);
-      ctx.fillStyle = "black";
+      ctx.strokeStyle = "black";
       ctx.fill();
       ctx.closePath();
     }
-
-    for (const [x1, y1, x2, y2] of this.storage) {
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
-
-    return this.storage;
   };
 }
