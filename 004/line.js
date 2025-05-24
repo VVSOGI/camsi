@@ -9,7 +9,54 @@ export class Line {
     this.drag = false;
     this.gap = 10;
     this.dragCornerRectSize = 10;
+
+    this.points = [];
+    this.intervals = 20;
   }
+
+  updatePoints = () => {
+    for (let i = 0; i <= this.intervals; i++) {
+      const ratio = i / this.intervals;
+      const x = this.x1 + (this.x2 - this.x1) * ratio;
+      const y = this.y1 + (this.y2 - this.y1) * ratio;
+      this.points.push({ x, y });
+    }
+  };
+
+  openDragRange = (ctx) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(
+      this.x1 + this.dragCornerRectSize / 2,
+      this.y1 + this.dragCornerRectSize / 2,
+      -this.dragCornerRectSize,
+      -this.dragCornerRectSize,
+      4
+    );
+    ctx.roundRect(
+      this.x2 + this.dragCornerRectSize / 2,
+      this.y2 + this.dragCornerRectSize / 2,
+      -this.dragCornerRectSize,
+      -this.dragCornerRectSize,
+      4
+    );
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(105, 105, 230, 0.5)";
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+  };
+
+  drawDot = (ctx, x, y) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+  };
 
   draw = (ctx) => {
     ctx.beginPath();
@@ -17,30 +64,36 @@ export class Line {
     ctx.lineTo(this.x2, this.y2);
     ctx.strokeStyle = "black";
     ctx.stroke();
+    ctx.closePath();
+
+    for (const point of this.points) {
+      this.drawDot(ctx, point.x, point.y);
+    }
+
+    let begin = this.points[0];
+    const last = this.points[this.points.length - 1];
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(begin.x, begin.y);
+
+    for (let i = 1; i < this.points.length; i++) {
+      const current = this.points[i];
+      ctx.lineTo(current.x, begin.y);
+      ctx.lineTo(current.x, current.y);
+      ctx.lineTo(begin.x, current.y);
+      ctx.lineTo(begin.x, begin.y);
+      ctx.moveTo(current.x, current.y);
+      begin = current;
+    }
+
+    ctx.fillStyle = "rgba(105, 105, 230, 0.5)";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
 
     if (this.drag) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(
-        this.x1 + this.dragCornerRectSize / 2,
-        this.y1 + this.dragCornerRectSize / 2,
-        -this.dragCornerRectSize,
-        -this.dragCornerRectSize,
-        4
-      );
-      ctx.roundRect(
-        this.x2 + this.dragCornerRectSize / 2,
-        this.y2 + this.dragCornerRectSize / 2,
-        -this.dragCornerRectSize,
-        -this.dragCornerRectSize,
-        4
-      );
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(105, 105, 230, 0.5)";
-      ctx.stroke();
-      ctx.closePath();
-      ctx.restore();
+      this.openDragRange(ctx);
     }
   };
 }

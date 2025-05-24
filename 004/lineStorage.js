@@ -7,11 +7,6 @@ export class LineStorage {
     this.tempPoint2 = null;
     this.point1 = null;
     this.point2 = null;
-
-    /**
-     * 두 점의 좌표들의 모음
-     */
-    this.storage = new Set();
   }
 
   resize = (stageWidth, stageHeight) => {
@@ -35,7 +30,8 @@ export class LineStorage {
       }
 
       const line = new Line(this.point1.x, this.point1.y, this.tempPoint2.x, this.tempPoint2.y);
-      this.storage.add(line);
+      line.updatePoints();
+
       this.point1 = null;
       this.point2 = null;
       this.tempPoint1 = null;
