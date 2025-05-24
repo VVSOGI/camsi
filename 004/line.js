@@ -70,7 +70,27 @@ export class Line {
       this.drawDot(ctx, point.x, point.y);
     }
 
-    let start = this.points[0];
+    let begin = this.points[0];
+    const last = this.points[this.points.length - 1];
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(begin.x, begin.y);
+
+    for (let i = 1; i < this.points.length; i++) {
+      const current = this.points[i];
+      ctx.lineTo(current.x, begin.y);
+      ctx.lineTo(current.x, current.y);
+      ctx.lineTo(begin.x, current.y);
+      ctx.lineTo(begin.x, begin.y);
+      ctx.moveTo(current.x, current.y);
+      begin = current;
+    }
+
+    ctx.fillStyle = "rgba(105, 105, 230, 0.5)";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
 
     if (this.drag) {
       this.openDragRange(ctx);
