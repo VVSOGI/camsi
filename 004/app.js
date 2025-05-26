@@ -68,6 +68,10 @@ class App {
       this.usermode = "default";
       this.components.push(line);
     });
+
+    for (const component of this.components) {
+      component.onClick(mousePosition);
+    }
   };
 
   mouseMove = (e) => {
