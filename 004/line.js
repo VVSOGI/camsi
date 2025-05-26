@@ -1,6 +1,11 @@
 export class Line {
   constructor(x1, y1, x2, y2) {
     this.id = new Date().getTime();
+    this.originX1 = x1;
+    this.originY1 = y1;
+    this.originX2 = x2;
+    this.originY2 = y2;
+
     this.x1 = x1;
     this.y1 = y1;
     this.x2 = x2;
@@ -12,6 +17,13 @@ export class Line {
 
     this.threshold = 10;
   }
+
+  initializeOriginPosition = () => {
+    this.originX1 = this.x1;
+    this.originX2 = this.x2;
+    this.originY1 = this.y1;
+    this.originY2 = this.y2;
+  };
 
   onHover = (mousePosition) => {
     const isNeedCalculate = this.isInSquare(mousePosition);
@@ -28,7 +40,18 @@ export class Line {
     return true;
   };
 
-  onClick = (mousePosition) => {
+  onMove = (movePosition) => {
+    if (!this.drag) return;
+
+    const { x, y } = movePosition;
+
+    this.x1 = this.originX1 + x;
+    this.y1 = this.originY1 + y;
+    this.x2 = this.originX2 + x;
+    this.y2 = this.originY2 + y;
+  };
+
+  isClicked = (mousePosition) => {
     const isNeedCalculate = this.isInSquare(mousePosition);
 
     if (!isNeedCalculate) {
@@ -38,7 +61,10 @@ export class Line {
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
       this.drag = true;
+      return true;
     }
+
+    return false;
   };
 
   isInSquare = (mousePosition) => {
@@ -49,7 +75,7 @@ export class Line {
     const top = Math.min(this.y1, this.y2);
     const bottom = Math.max(this.y1, this.y2);
 
-    if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
+    if (mouseX > left && mouseX < right && mouseY > top && mouseY < bottom) {
       return true;
     }
 
@@ -90,16 +116,6 @@ export class Line {
     ctx.fill();
     ctx.strokeStyle = "rgba(105, 105, 230, 0.5)";
     ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
-  };
-
-  drawDot = (ctx, x, y) => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, Math.PI * 2);
-    ctx.fillStyle = "black";
-    ctx.fill();
     ctx.closePath();
     ctx.restore();
   };
