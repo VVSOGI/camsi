@@ -9,7 +9,9 @@ class App {
     this.container.appendChild(this.canvas);
     this.usermode = "default";
     this.dragStart = null;
+    this.moveStart = null;
     this.components = [];
+    this.selectedComponents = new Set();
 
     this.LineButton = document.querySelector(".line-button");
     this.LineStorage = new LineStorage();
@@ -18,9 +20,8 @@ class App {
     this.resize();
     window.addEventListener("resize", this.resize);
 
-    this.canvas.addEventListener("click", this.mouseClick);
+    this.canvas.addEventListener("mousedown", this.mouseDown);
     window.addEventListener("mousemove", this.mouseMove);
-    window.addEventListener("mousedown", this.mouseDown);
     window.addEventListener("mouseup", this.mouseUp);
 
     this.LineButton.addEventListener("click", (e) => {
@@ -39,19 +40,76 @@ class App {
     return mousePosition;
   };
 
-  mouseUp = (e) => {
-    if (this.usermode === "drag") {
-      this.usermode = "default";
-      this.dragStart = null;
+  initializeSelectedComponents = () => {
+    for (const component of this.selectedComponents) {
+      component.drag = false;
     }
+    this.selectedComponents = new Set();
+  };
+
+  findComponentWithPosition = (mousePosition) => {
+    for (const component of this.components) {
+      if (component.isClicked(mousePosition)) {
+        return component;
+      }
+    }
+
+    return null;
+  };
+
+  mouseUp = (e) => {
+    const mousePosition = this.getMousePoint(e);
+    const isDefaultModeNotDrag =
+      this.usermode === "drag" &&
+      this.dragStart.mouseX === mousePosition.mouseX &&
+      this.dragStart.mouseY === mousePosition.mouseY;
+
+    const isDefaultModeNotMove =
+      this.usermode === "move" &&
+      this.moveStart.mouseX === mousePosition.mouseX &&
+      this.moveStart.mouseY === mousePosition.mouseY;
+
+    if (isDefaultModeNotDrag) {
+      for (const component of this.components) {
+        component.drag = false;
+      }
+    }
+
+    if (isDefaultModeNotMove) {
+      const component = this.findComponentWithPosition(mousePosition);
+      this.initializeSelectedComponents();
+      this.selectedComponents.add(component);
+      component.drag = true;
+    }
+
+    if (this.usermode === "drag" || this.usermode === "move") {
+      this.usermode = "default";
+      this.moveStart = null;
+      this.dragStart = null;
+
+      for (const component of this.selectedComponents) {
+        component.initializeOriginPosition();
+      }
+    }
+
+    this.LineStorage.mouseClick(this.usermode, mousePosition, (line) => {
+      this.usermode = "default";
+      this.components.push(line);
+    });
   };
 
   mouseDown = (e) => {
     const mousePosition = this.getMousePoint(e);
     const { mouseX, mouseY } = mousePosition;
 
-    for (const component of this.components) {
-      component.drag = false;
+    const component = this.findComponentWithPosition(mousePosition);
+    if (component) {
+      this.usermode = "move";
+      this.moveStart = {
+        mouseX,
+        mouseY,
+      };
+      return;
     }
 
     if (mouseX >= 0 && mouseY >= 0 && this.usermode === "default") {
@@ -61,21 +119,33 @@ class App {
     }
   };
 
-  mouseClick = (e) => {
-    const mousePosition = this.getMousePoint(e);
-
-    this.LineStorage.mouseClick(this.usermode, mousePosition, (line) => {
-      this.usermode = "default";
-      this.components.push(line);
-    });
-  };
-
   mouseMove = (e) => {
     /**
      * 사실 LineButton을 만들 필요는 없었는데, 이걸 굳이 만들어서 getBoundingClientRect의 쓰임새를 알게 됐다.
      * canvas가 좌측 상단 맨 위에 붙어있지 않을 경우에 그 차이만큼 계산해준다.
      */
     const mousePosition = this.getMousePoint(e);
+
+    if (this.canvas.style.cursor === "move") {
+      this.canvas.style.cursor = "default";
+    }
+
+    for (const component of this.components) {
+      const hover = component.onHover(mousePosition);
+      if (hover) {
+        this.canvas.style.cursor = "move";
+      }
+    }
+
+    if (this.usermode === "move") {
+      for (const component of this.selectedComponents) {
+        const move = {
+          x: mousePosition.mouseX - this.moveStart.mouseX,
+          y: mousePosition.mouseY - this.moveStart.mouseY,
+        };
+        component.onMove(move);
+      }
+    }
 
     this.LineStorage.mouseMove(this.usermode, mousePosition);
     this.Drag.mouseMove(this.usermode, mousePosition);
@@ -108,8 +178,23 @@ class App {
 
       const { x1, y1, x2, y2 } = range;
       for (const component of this.components) {
-        if (component.x1 >= x1 && component.x2 <= x2 && component.y1 >= y1 && component.y2 <= y2) {
+        if (
+          component.x1 >= x1 &&
+          component.x2 >= x1 &&
+          component.x1 <= x2 &&
+          component.x2 <= x2 &&
+          component.y1 >= y1 &&
+          component.y2 >= y1 &&
+          component.y1 <= y2 &&
+          component.y2 <= y2
+        ) {
           component.drag = true;
+          this.selectedComponents.add(component);
+        } else {
+          if (component.drag) {
+            component.drag = false;
+            this.selectedComponents.delete(component);
+          }
         }
       }
     }

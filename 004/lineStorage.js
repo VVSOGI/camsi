@@ -30,7 +30,6 @@ export class LineStorage {
       }
 
       const line = new Line(this.point1.x, this.point1.y, this.tempPoint2.x, this.tempPoint2.y);
-      line.updatePoints();
 
       this.point1 = null;
       this.point2 = null;
