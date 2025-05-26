@@ -77,6 +77,10 @@ class App {
      */
     const mousePosition = this.getMousePoint(e);
 
+    for (const component of this.components) {
+      component.onHover(mousePosition);
+    }
+
     this.LineStorage.mouseMove(this.usermode, mousePosition);
     this.Drag.mouseMove(this.usermode, mousePosition);
   };
