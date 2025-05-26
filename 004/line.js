@@ -11,7 +11,7 @@ export class Line {
     this.dragCornerRectSize = 10;
 
     this.points = [];
-    this.intervals = 50;
+    this.intervals = 30;
   }
 
   updatePoints = () => {
@@ -35,16 +35,33 @@ export class Line {
 
   isMouseOnLine = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
+    let begin = this.points[0];
+
+    for (let i = 1; i < this.points.length; i++) {
+      const next = this.points[i];
+      if (mouseX >= begin.x && mouseX <= next.x && mouseY >= begin.y && mouseY <= next.y) {
+        return true;
+      }
+      begin = next;
+    }
+
+    return false;
   };
 
   onHover = (mousePosition) => {
     const isNeedCalculate = this.isInSquare(mousePosition);
 
     if (!isNeedCalculate) {
-      return;
+      return false;
     }
 
-    console.log("Need calculate");
+    const isHover = this.isMouseOnLine(mousePosition);
+
+    if (!isHover) {
+      return false;
+    }
+
+    return true;
   };
 
   openDragRange = (ctx) => {

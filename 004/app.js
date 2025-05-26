@@ -77,8 +77,15 @@ class App {
      */
     const mousePosition = this.getMousePoint(e);
 
+    if (this.canvas.style.cursor === "move") {
+      this.canvas.style.cursor = "default";
+    }
+
     for (const component of this.components) {
-      component.onHover(mousePosition);
+      const hover = component.onHover(mousePosition);
+      if (hover) {
+        this.canvas.style.cursor = "move";
+      }
     }
 
     this.LineStorage.mouseMove(this.usermode, mousePosition);
