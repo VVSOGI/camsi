@@ -70,10 +70,20 @@ export class Line {
   isInSquare = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
 
-    const left = Math.min(this.x1, this.x2);
-    const right = Math.max(this.x1, this.x2);
-    const top = Math.min(this.y1, this.y2);
-    const bottom = Math.max(this.y1, this.y2);
+    let left = Math.min(this.x1, this.x2);
+    let right = Math.max(this.x1, this.x2);
+    let top = Math.min(this.y1, this.y2);
+    let bottom = Math.max(this.y1, this.y2);
+
+    if (Math.abs(left - right) < 10) {
+      left -= this.threshold;
+      right += this.threshold;
+    }
+
+    if (Math.abs(top - bottom) < 10) {
+      top -= this.threshold;
+      bottom += this.threshold;
+    }
 
     if (mouseX > left && mouseX < right && mouseY > top && mouseY < bottom) {
       return true;

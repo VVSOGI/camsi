@@ -108,6 +108,8 @@ class App {
       this.canvas.style.cursor = "default";
     }
 
+    this.LineStorage.mouseMove(this.usermode, mousePosition);
+    this.Drag.mouseMove(this.usermode, mousePosition);
     this.ComponentManager.hoverComponent(mousePosition, () => {
       this.canvas.style.cursor = "move";
     });
@@ -115,9 +117,6 @@ class App {
     if (this.usermode === "move") {
       this.ComponentManager.moveComponent(mousePosition, this.moveStart);
     }
-
-    this.LineStorage.mouseMove(this.usermode, mousePosition);
-    this.Drag.mouseMove(this.usermode, mousePosition);
   };
 
   resize = () => {
