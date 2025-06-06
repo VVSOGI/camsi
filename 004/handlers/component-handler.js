@@ -57,12 +57,9 @@ export class ComponentHandler {
     component.drag = true;
   };
 
-  hoverComponent = (mousePosition, onHover) => {
+  hoverComponent = (mousePosition, canvas) => {
     for (const component of this.components) {
-      const hover = component.onHover(mousePosition);
-      if (hover) {
-        onHover();
-      }
+      component.onHover(mousePosition, canvas);
     }
   };
 

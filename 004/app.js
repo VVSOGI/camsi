@@ -82,15 +82,13 @@ class App {
     const mouseMode = this.mouseEvent.getMode();
     const { moveStart } = this.mouseEvent.getEntryPoint();
 
-    if (this.canvas.style.cursor === "move") {
+    if (this.canvas.style.cursor === "move" || this.canvas.style.cursor === "pointer") {
       this.canvas.style.cursor = "default";
     }
 
     this.LineStorage.mouseMove(mouseMode, mousePosition);
     this.Drag.mouseMove(mouseMode, mousePosition);
-    this.ComponentManager.hoverComponent(mousePosition, () => {
-      this.canvas.style.cursor = "move";
-    });
+    this.ComponentManager.hoverComponent(mousePosition, this.canvas);
 
     if (mouseMode === "move") {
       this.ComponentManager.moveComponent(mousePosition, moveStart);
