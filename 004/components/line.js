@@ -12,6 +12,7 @@ export class Line {
     this.y2 = y2;
 
     this.drag = false;
+    this.endpointHover = false;
     this.gap = 10;
     this.dragCornerRectSize = 10;
 
@@ -25,19 +26,27 @@ export class Line {
     this.originY2 = this.y2;
   };
 
-  onHover = (mousePosition) => {
-    const isNeedCalculate = this.isInSquare(mousePosition);
-
-    if (!isNeedCalculate) {
-      return false;
-    }
-
+  onHover = (mousePosition, canvas) => {
     const distance = this.getDistanceFromLine(mousePosition);
-    if (distance > this.threshold) {
-      return false;
+
+    if (distance <= this.threshold) {
+      canvas.style.cursor = "move";
     }
 
-    return true;
+    if (this.drag) {
+      const { mouseX, mouseY } = mousePosition;
+      const centerX = this.x1;
+      const centerY = this.y1;
+
+      if (
+        mouseX >= centerX - this.dragCornerRectSize / 2 &&
+        mouseX < centerX + this.dragCornerRectSize / 2 &&
+        mouseY >= centerY - this.dragCornerRectSize / 2 &&
+        mouseY < centerY + this.dragCornerRectSize / 2
+      ) {
+        canvas.style.cursor = "pointer";
+      }
+    }
   };
 
   onMove = (movePosition) => {
@@ -97,6 +106,10 @@ export class Line {
    */
   getDistanceFromLine = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
+
+    if (mouseX < this.x1 || mouseX > this.x2 || mouseY < this.y1 || mouseY > this.y2) {
+      return this.threshold + 1;
+    }
 
     const A = this.y2 - this.y1;
     const B = this.x1 - this.x2;
