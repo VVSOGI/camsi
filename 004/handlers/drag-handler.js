@@ -1,4 +1,4 @@
-export class Drag {
+export class DragHandler {
   constructor() {
     this.modeType = "drag";
     this.tempPoint = null;

@@ -1,4 +1,4 @@
-export class MouseEvent {
+export class MouseEventHandler {
   constructor(canvas) {
     this.canvas = canvas;
     this.mode = "default";

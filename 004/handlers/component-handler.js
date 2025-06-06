@@ -1,4 +1,4 @@
-export class ComponentManager {
+export class ComponentHandler {
   constructor() {
     this.components = [];
     this.selectedComponents = new Set();

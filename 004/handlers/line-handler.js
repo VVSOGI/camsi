@@ -1,6 +1,6 @@
-import { Line } from "./line.js";
+import { Line } from "../components/line.js";
 
-export class LineStorage {
+export class LineHandler {
   constructor() {
     this.modeType = "line";
     this.tempPoint1 = null;
