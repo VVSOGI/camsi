@@ -1,7 +1,4 @@
-import { LineStorage } from "./lineStorage.js";
-import { Drag } from "./drag.js";
-import { ComponentManager } from "./component.js";
-import { MouseEvent } from "./MouseEvent.js";
+import { LineHandler, DragHandler, ComponentHandler, MouseEventHandler } from "./handlers/index.js";
 
 class App {
   constructor() {
@@ -12,10 +9,10 @@ class App {
 
     this.LineButton = document.querySelector(".line-button");
 
-    this.Drag = new Drag();
-    this.LineStorage = new LineStorage();
-    this.mouseEvent = new MouseEvent(this.canvas);
-    this.ComponentManager = new ComponentManager();
+    this.Drag = new DragHandler();
+    this.LineStorage = new LineHandler();
+    this.mouseEvent = new MouseEventHandler(this.canvas);
+    this.ComponentManager = new ComponentHandler();
 
     this.resize();
     window.addEventListener("resize", this.resize);
