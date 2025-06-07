@@ -34,23 +34,7 @@ export class Line {
     }
 
     if (this.drag) {
-      const { mouseX, mouseY } = mousePosition;
-      const centerX1 = this.x1;
-      const centerY1 = this.y1;
-      const centerX2 = this.x2;
-      const centerY2 = this.y2;
-
-      const isMouseOnStartPoint =
-        mouseX >= centerX1 - this.dragCornerRectSize / 2 &&
-        mouseX < centerX1 + this.dragCornerRectSize / 2 &&
-        mouseY >= centerY1 - this.dragCornerRectSize / 2 &&
-        mouseY < centerY1 + this.dragCornerRectSize / 2;
-
-      const isMouseOnEndPoint =
-        mouseX >= centerX2 - this.dragCornerRectSize / 2 &&
-        mouseX < centerX2 + this.dragCornerRectSize / 2 &&
-        mouseY >= centerY2 - this.dragCornerRectSize / 2 &&
-        mouseY < centerY2 + this.dragCornerRectSize / 2;
+      const { isMouseOnStartPoint, isMouseOnEndPoint } = this.isMouseOnCornorPoint(mousePosition);
 
       if (isMouseOnStartPoint || isMouseOnEndPoint) {
         canvas.style.cursor = "pointer";
@@ -79,29 +63,29 @@ export class Line {
     return false;
   };
 
-  isInSquare = (mousePosition) => {
+  isMouseOnCornorPoint = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
+    const centerX1 = this.x1;
+    const centerY1 = this.y1;
+    const centerX2 = this.x2;
+    const centerY2 = this.y2;
 
-    let left = Math.min(this.x1, this.x2);
-    let right = Math.max(this.x1, this.x2);
-    let top = Math.min(this.y1, this.y2);
-    let bottom = Math.max(this.y1, this.y2);
+    const isMouseOnStartPoint =
+      mouseX >= centerX1 - this.dragCornerRectSize / 2 &&
+      mouseX < centerX1 + this.dragCornerRectSize / 2 &&
+      mouseY >= centerY1 - this.dragCornerRectSize / 2 &&
+      mouseY < centerY1 + this.dragCornerRectSize / 2;
 
-    if (Math.abs(left - right) < 10) {
-      left -= this.threshold;
-      right += this.threshold;
-    }
+    const isMouseOnEndPoint =
+      mouseX >= centerX2 - this.dragCornerRectSize / 2 &&
+      mouseX < centerX2 + this.dragCornerRectSize / 2 &&
+      mouseY >= centerY2 - this.dragCornerRectSize / 2 &&
+      mouseY < centerY2 + this.dragCornerRectSize / 2;
 
-    if (Math.abs(top - bottom) < 10) {
-      top -= this.threshold;
-      bottom += this.threshold;
-    }
-
-    if (mouseX > left && mouseX < right && mouseY > top && mouseY < bottom) {
-      return true;
-    }
-
-    return false;
+    return {
+      isMouseOnStartPoint,
+      isMouseOnEndPoint,
+    };
   };
 
   /**
