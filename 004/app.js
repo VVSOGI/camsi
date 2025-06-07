@@ -44,7 +44,7 @@ class App {
 
     if (mouseMode === "drag" || mouseMode === "move") {
       this.mouseEvent.initializeEntryPointer();
-      this.ComponentManager.initializeOriginPosition();
+      this.ComponentManager.mouseUp();
     }
 
     if (mouseMode === "line") {
