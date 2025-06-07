@@ -61,12 +61,6 @@ export class Line {
   };
 
   isClicked = (mousePosition) => {
-    const isNeedCalculate = this.isInSquare(mousePosition);
-
-    if (!isNeedCalculate) {
-      return false;
-    }
-
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
       this.drag = true;
@@ -106,8 +100,12 @@ export class Line {
    */
   getDistanceFromLine = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
+    const top = Math.min(this.y1, this.y2) - this.threshold / 2;
+    const bottom = Math.max(this.y1, this.y2) + this.threshold / 2;
+    const left = Math.min(this.x1, this.x2) - this.threshold / 2;
+    const right = Math.max(this.x1, this.x2) + this.threshold / 2;
 
-    if (mouseX < this.x1 || mouseX > this.x2 || mouseY < this.y1 || mouseY > this.y2) {
+    if (mouseX < left || mouseX > right || mouseY < top || mouseY > bottom) {
       return this.threshold + 1;
     }
 
