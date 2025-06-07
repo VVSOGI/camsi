@@ -57,6 +57,7 @@ export class Line {
       target.x = originTarget.x + x;
       target.y = originTarget.y + y;
 
+      this.hoverEndpoint = { x: target.x, y: target.y };
       return;
     }
 
