@@ -12,7 +12,7 @@ export class Line {
     this.y2 = y2;
 
     this.drag = false;
-    this.endpointHover = false;
+    this.hoverEndpoint = null;
     this.gap = 10;
     this.dragCornerRectSize = 10;
 
@@ -34,10 +34,12 @@ export class Line {
     }
 
     if (this.drag) {
-      const { isMouseOnStartPoint, isMouseOnEndPoint } = this.isMouseOnCornorPoint(mousePosition);
-
-      if (isMouseOnStartPoint || isMouseOnEndPoint) {
+      const { result, point } = this.isMouseOnCornorPoint(mousePosition);
+      if (result) {
+        this.hoverEndpoint = point;
         canvas.style.cursor = "pointer";
+      } else {
+        this.hoverEndpoint = null;
       }
     }
   };
@@ -56,7 +58,6 @@ export class Line {
   isClicked = (mousePosition) => {
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
-      this.drag = true;
       return true;
     }
 
@@ -82,10 +83,20 @@ export class Line {
       mouseY >= centerY2 - this.dragCornerRectSize / 2 &&
       mouseY < centerY2 + this.dragCornerRectSize / 2;
 
-    return {
-      isMouseOnStartPoint,
-      isMouseOnEndPoint,
-    };
+    if (isMouseOnStartPoint || isMouseOnEndPoint) {
+      return {
+        result: true,
+        point: {
+          x: isMouseOnStartPoint ? centerX1 : centerX2,
+          y: isMouseOnStartPoint ? centerY1 : centerY2,
+        },
+      };
+    } else {
+      return {
+        result: false,
+        point: {},
+      };
+    }
   };
 
   /**
@@ -134,6 +145,16 @@ export class Line {
     ctx.restore();
   };
 
+  hoverCornorPoint = (ctx) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(this.hoverEndpoint.x - 10, this.hoverEndpoint.y - 10, 20, 20, 10);
+    ctx.fillStyle = "rgba(105, 105, 230, 0.5)";
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+  };
+
   draw = (ctx) => {
     ctx.beginPath();
     ctx.moveTo(this.x1, this.y1);
@@ -141,6 +162,10 @@ export class Line {
     ctx.strokeStyle = "black";
     ctx.stroke();
     ctx.closePath();
+
+    if (this.hoverEndpoint) {
+      this.hoverCornorPoint(ctx);
+    }
 
     if (this.drag) {
       this.openDragRange(ctx);
