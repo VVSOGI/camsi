@@ -8,7 +8,7 @@ export class Line {
 
     this.drag = false;
     this.hoverEndpoint = null;
-    this.moveCornorPoint = false;
+    this.moveCornorPoint = -1;
 
     this.gap = 10;
     this.dragCornerRectSize = 10;
@@ -25,6 +25,8 @@ export class Line {
       x: this.point2.x,
       y: this.point2.y,
     };
+
+    this.moveCornorPoint = -1;
   };
 
   onHover = (mousePosition, canvas) => {
@@ -49,6 +51,15 @@ export class Line {
     if (!this.drag) return;
     const { x, y } = movePosition;
 
+    if (this.moveCornorPoint > -1) {
+      const originTarget = this.moveCornorPoint === 1 ? this.originPoint1 : this.originPoint2;
+      const target = this.moveCornorPoint === 1 ? this.point1 : this.point2;
+      target.x = originTarget.x + x;
+      target.y = originTarget.y + y;
+
+      return;
+    }
+
     this.point1 = {
       x: this.originPoint1.x + x,
       y: this.originPoint1.y + y,
@@ -67,8 +78,9 @@ export class Line {
   isClicked = (mousePosition) => {
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
-      const { onCornorPoint, point } = this.isMouseOnCornorPoint(mousePosition);
+      const { id, onCornorPoint } = this.isMouseOnCornorPoint(mousePosition);
       if (onCornorPoint) {
+        this.moveCornorPoint = id;
       }
 
       return true;
@@ -116,6 +128,7 @@ export class Line {
 
     if (isMouseOnStartPoint || isMouseOnEndPoint) {
       return {
+        id: isMouseOnStartPoint ? 1 : 2,
         onCornorPoint: true,
         point: {
           x: isMouseOnStartPoint ? centerX1 : centerX2,
@@ -125,6 +138,7 @@ export class Line {
     }
 
     return {
+      id: -1,
       onCornorPoint: false,
       point: {},
     };
