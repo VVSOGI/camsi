@@ -60,6 +60,10 @@ export class Line {
     };
   };
 
+  onMouseUp = () => {
+    this.initializeOriginPosition();
+  };
+
   isClicked = (mousePosition) => {
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {

@@ -62,6 +62,12 @@ export class ComponentHandler {
     }
   };
 
+  mouseUp = () => {
+    for (const component of this.selectedComponents) {
+      component.onMouseUp();
+    }
+  };
+
   findComponentWithPosition = (mousePosition) => {
     for (const component of this.components) {
       if (component.isClicked(mousePosition)) {
@@ -77,11 +83,5 @@ export class ComponentHandler {
       component.drag = false;
     }
     this.selectedComponents = new Set();
-  };
-
-  initializeOriginPosition = () => {
-    for (const component of this.selectedComponents) {
-      component.initializeOriginPosition();
-    }
   };
 }
