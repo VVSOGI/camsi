@@ -27,19 +27,8 @@ export class ComponentHandler {
   };
 
   dragComponents = (dragRanges) => {
-    const { x1, y1, x2, y2 } = dragRanges;
-
     for (const component of this.components) {
-      if (
-        component.x1 >= x1 &&
-        component.x2 >= x1 &&
-        component.x1 <= x2 &&
-        component.x2 <= x2 &&
-        component.y1 >= y1 &&
-        component.y2 >= y1 &&
-        component.y1 <= y2 &&
-        component.y2 <= y2
-      ) {
+      if (component.isInDragRange(dragRanges)) {
         component.drag = true;
         this.selectedComponents.add(component);
       } else {
