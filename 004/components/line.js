@@ -1,10 +1,12 @@
 export class Line {
   constructor(x1, y1, x2, y2) {
     this.id = new Date().getTime();
-    this.originPoint1 = { x: x1, y: y1 };
-    this.originPoint2 = { x: x2, y: y2 };
-    this.point1 = { x: x1, y: y1 };
-    this.point2 = { x: x2, y: y2 };
+
+    const cx = Math.min(x1, x2) + Math.abs(x2 - x1) / 2;
+    const cy = Math.min(y1, y2) + Math.abs(y2 - y1) / 2;
+
+    this.originPoint = { x1, y1, cx, cy, x2, y2 };
+    this.point = { x1, y1, cx, cy, x2, y2 };
 
     this.drag = false;
     this.hoverEndpoint = null;
@@ -16,14 +18,13 @@ export class Line {
   }
 
   initializeOriginPosition = () => {
-    this.originPoint1 = {
-      x: this.point1.x,
-      y: this.point1.y,
-    };
-
-    this.originPoint2 = {
-      x: this.point2.x,
-      y: this.point2.y,
+    this.originPoint = {
+      x1: this.point.x1,
+      y1: this.point.y1,
+      cx: this.point.cx,
+      cy: this.point.cy,
+      x2: this.point.x2,
+      y2: this.point.y2,
     };
 
     this.moveCornorPoint = -1;
@@ -52,23 +53,28 @@ export class Line {
     const { x, y } = movePosition;
 
     if (this.moveCornorPoint > -1) {
-      const originTarget = this.moveCornorPoint === 1 ? this.originPoint1 : this.originPoint2;
-      const target = this.moveCornorPoint === 1 ? this.point1 : this.point2;
-      target.x = originTarget.x + x;
-      target.y = originTarget.y + y;
+      if (this.moveCornorPoint === 1) {
+        this.point.x1 = this.originPoint.x1 + x;
+        this.point.y1 = this.originPoint.y1 + y;
+        this.hoverEndpoint = { x: this.point.x1, y: this.point.y1 };
+      } else {
+        this.point.x2 = this.originPoint.x2 + x;
+        this.point.y2 = this.originPoint.y2 + y;
+        this.hoverEndpoint = { x: this.point.x2, y: this.point.y2 };
+      }
 
-      this.hoverEndpoint = { x: target.x, y: target.y };
+      this.point.cx = (this.point.x1 + this.point.x2) / 2;
+      this.point.cy = (this.point.y1 + this.point.y2) / 2;
       return;
     }
 
-    this.point1 = {
-      x: this.originPoint1.x + x,
-      y: this.originPoint1.y + y,
-    };
-
-    this.point2 = {
-      x: this.originPoint2.x + x,
-      y: this.originPoint2.y + y,
+    this.point = {
+      x1: this.originPoint.x1 + x,
+      y1: this.originPoint.y1 + y,
+      x2: this.originPoint.x2 + x,
+      y2: this.originPoint.y2 + y,
+      cx: this.originPoint.cx + x,
+      cy: this.originPoint.cy + y,
     };
   };
 
@@ -93,14 +99,14 @@ export class Line {
   isInDragRange = (dragRanges) => {
     const { x1, y1, x2, y2 } = dragRanges;
     if (
-      this.point1.x >= x1 &&
-      this.point2.x >= x1 &&
-      this.point1.x <= x2 &&
-      this.point2.x <= x2 &&
-      this.point1.y >= y1 &&
-      this.point2.y >= y1 &&
-      this.point1.y <= y2 &&
-      this.point2.y <= y2
+      this.point.x1 >= x1 &&
+      this.point.x2 >= x1 &&
+      this.point.x1 <= x2 &&
+      this.point.x2 <= x2 &&
+      this.point.y1 >= y1 &&
+      this.point.y2 >= y1 &&
+      this.point.y1 <= y2 &&
+      this.point.y2 <= y2
     ) {
       return true;
     } else {
@@ -110,10 +116,10 @@ export class Line {
 
   isMouseOnCornorPoint = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
-    const centerX1 = this.point1.x;
-    const centerY1 = this.point1.y;
-    const centerX2 = this.point2.x;
-    const centerY2 = this.point2.y;
+    const centerX1 = this.point.x1;
+    const centerY1 = this.point.y1;
+    const centerX2 = this.point.x2;
+    const centerY2 = this.point.y2;
 
     const isMouseOnStartPoint =
       mouseX >= centerX1 - this.dragCornerRectSize / 2 &&
@@ -150,18 +156,18 @@ export class Line {
    */
   getDistanceFromLine = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
-    const top = Math.min(this.point1.y, this.point2.y) - this.threshold / 2;
-    const bottom = Math.max(this.point1.y, this.point2.y) + this.threshold / 2;
-    const left = Math.min(this.point1.x, this.point2.x) - this.threshold / 2;
-    const right = Math.max(this.point1.x, this.point2.x) + this.threshold / 2;
+    const top = Math.min(this.point.y1, this.point.y2) - this.threshold / 2;
+    const bottom = Math.max(this.point.y1, this.point.y2) + this.threshold / 2;
+    const left = Math.min(this.point.x1, this.point.x2) - this.threshold / 2;
+    const right = Math.max(this.point.x1, this.point.x2) + this.threshold / 2;
 
     if (mouseX < left || mouseX > right || mouseY < top || mouseY > bottom) {
       return this.threshold + 1;
     }
 
-    const A = this.point2.y - this.point1.y;
-    const B = this.point1.x - this.point2.x;
-    const C = this.point2.x * this.point1.y - this.point1.x * this.point2.y;
+    const A = this.point.y2 - this.point.y1;
+    const B = this.point.x1 - this.point.x2;
+    const C = this.point.x2 * this.point.y1 - this.point.x1 * this.point.y2;
 
     return Math.abs(A * mouseX + B * mouseY + C) / Math.sqrt(A * A + B * B);
   };
@@ -170,15 +176,22 @@ export class Line {
     ctx.save();
     ctx.beginPath();
     ctx.roundRect(
-      this.point1.x + this.dragCornerRectSize / 2,
-      this.point1.y + this.dragCornerRectSize / 2,
+      this.point.x1 + this.dragCornerRectSize / 2,
+      this.point.y1 + this.dragCornerRectSize / 2,
       -this.dragCornerRectSize,
       -this.dragCornerRectSize,
       4
     );
     ctx.roundRect(
-      this.point2.x + this.dragCornerRectSize / 2,
-      this.point2.y + this.dragCornerRectSize / 2,
+      this.point.cx + this.dragCornerRectSize / 2,
+      this.point.cy + this.dragCornerRectSize / 2,
+      -this.dragCornerRectSize,
+      -this.dragCornerRectSize,
+      4
+    );
+    ctx.roundRect(
+      this.point.x2 + this.dragCornerRectSize / 2,
+      this.point.y2 + this.dragCornerRectSize / 2,
       -this.dragCornerRectSize,
       -this.dragCornerRectSize,
       4
@@ -203,8 +216,9 @@ export class Line {
 
   draw = (ctx) => {
     ctx.beginPath();
-    ctx.moveTo(this.point1.x, this.point1.y);
-    ctx.lineTo(this.point2.x, this.point2.y);
+    ctx.moveTo(this.point.x1, this.point.y1);
+    ctx.lineTo(this.point.cx, this.point.cy);
+    ctx.lineTo(this.point.x2, this.point.y2);
     ctx.strokeStyle = "black";
     ctx.stroke();
     ctx.closePath();
