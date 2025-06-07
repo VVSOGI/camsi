@@ -35,15 +35,24 @@ export class Line {
 
     if (this.drag) {
       const { mouseX, mouseY } = mousePosition;
-      const centerX = this.x1;
-      const centerY = this.y1;
+      const centerX1 = this.x1;
+      const centerY1 = this.y1;
+      const centerX2 = this.x2;
+      const centerY2 = this.y2;
 
-      if (
-        mouseX >= centerX - this.dragCornerRectSize / 2 &&
-        mouseX < centerX + this.dragCornerRectSize / 2 &&
-        mouseY >= centerY - this.dragCornerRectSize / 2 &&
-        mouseY < centerY + this.dragCornerRectSize / 2
-      ) {
+      const isMouseOnStartPoint =
+        mouseX >= centerX1 - this.dragCornerRectSize / 2 &&
+        mouseX < centerX1 + this.dragCornerRectSize / 2 &&
+        mouseY >= centerY1 - this.dragCornerRectSize / 2 &&
+        mouseY < centerY1 + this.dragCornerRectSize / 2;
+
+      const isMouseOnEndPoint =
+        mouseX >= centerX2 - this.dragCornerRectSize / 2 &&
+        mouseX < centerX2 + this.dragCornerRectSize / 2 &&
+        mouseY >= centerY2 - this.dragCornerRectSize / 2 &&
+        mouseY < centerY2 + this.dragCornerRectSize / 2;
+
+      if (isMouseOnStartPoint || isMouseOnEndPoint) {
         canvas.style.cursor = "pointer";
       }
     }
