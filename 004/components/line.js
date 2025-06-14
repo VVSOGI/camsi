@@ -1,5 +1,6 @@
 export class Line {
   constructor(x1, y1, x2, y2) {
+    this.type = "line";
     this.id = new Date().getTime();
 
     const cx = Math.min(x1, x2) + Math.abs(x2 - x1) / 2;
@@ -38,9 +39,9 @@ export class Line {
     }
 
     if (this.drag) {
-      const { onCornorPoint, point } = this.isMouseOnCornorPoint(mousePosition);
-      if (onCornorPoint) {
-        this.hoverEndpoint = point;
+      const { point, coordinates } = this.getMouseHitControlPoint(mousePosition);
+      if (point > -1) {
+        this.hoverEndpoint = coordinates;
         canvas.style.cursor = "pointer";
       } else {
         this.hoverEndpoint = null;
@@ -54,10 +55,20 @@ export class Line {
 
     if (this.moveCornorPoint > -1) {
       if (this.moveCornorPoint === 1) {
+        this.point.cx = this.originPoint.cx + x;
+        this.point.cy = this.originPoint.cy + y;
+        this.hoverEndpoint = { x: this.point.cx, y: this.point.cy };
+        this.type = "curve";
+        return;
+      }
+
+      if (this.moveCornorPoint === 0) {
         this.point.x1 = this.originPoint.x1 + x;
         this.point.y1 = this.originPoint.y1 + y;
         this.hoverEndpoint = { x: this.point.x1, y: this.point.y1 };
-      } else {
+      }
+
+      if (this.moveCornorPoint === 2) {
         this.point.x2 = this.originPoint.x2 + x;
         this.point.y2 = this.originPoint.y2 + y;
         this.hoverEndpoint = { x: this.point.x2, y: this.point.y2 };
@@ -85,9 +96,9 @@ export class Line {
   isClicked = (mousePosition) => {
     const distance = this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
-      const { id, onCornorPoint } = this.isMouseOnCornorPoint(mousePosition);
-      if (onCornorPoint) {
-        this.moveCornorPoint = id;
+      const { point } = this.getMouseHitControlPoint(mousePosition);
+      if (point > -1) {
+        this.moveCornorPoint = point;
       }
 
       return true;
@@ -114,40 +125,60 @@ export class Line {
     }
   };
 
-  isMouseOnCornorPoint = (mousePosition) => {
+  getMouseHitControlPoint = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
-    const centerX1 = this.point.x1;
-    const centerY1 = this.point.y1;
-    const centerX2 = this.point.x2;
-    const centerY2 = this.point.y2;
 
     const isMouseOnStartPoint =
-      mouseX >= centerX1 - this.dragCornerRectSize / 2 &&
-      mouseX < centerX1 + this.dragCornerRectSize / 2 &&
-      mouseY >= centerY1 - this.dragCornerRectSize / 2 &&
-      mouseY < centerY1 + this.dragCornerRectSize / 2;
+      mouseX >= this.point.x1 - this.dragCornerRectSize / 2 &&
+      mouseX < this.point.x1 + this.dragCornerRectSize / 2 &&
+      mouseY >= this.point.y1 - this.dragCornerRectSize / 2 &&
+      mouseY < this.point.y1 + this.dragCornerRectSize / 2;
+
+    const isMouseOnCenterPoint =
+      mouseX >= this.point.cx - this.dragCornerRectSize / 2 &&
+      mouseX < this.point.cx + this.dragCornerRectSize / 2 &&
+      mouseY >= this.point.cy - this.dragCornerRectSize / 2 &&
+      mouseY < this.point.cy + this.dragCornerRectSize / 2;
 
     const isMouseOnEndPoint =
-      mouseX >= centerX2 - this.dragCornerRectSize / 2 &&
-      mouseX < centerX2 + this.dragCornerRectSize / 2 &&
-      mouseY >= centerY2 - this.dragCornerRectSize / 2 &&
-      mouseY < centerY2 + this.dragCornerRectSize / 2;
+      mouseX >= this.point.x2 - this.dragCornerRectSize / 2 &&
+      mouseX < this.point.x2 + this.dragCornerRectSize / 2 &&
+      mouseY >= this.point.y2 - this.dragCornerRectSize / 2 &&
+      mouseY < this.point.y2 + this.dragCornerRectSize / 2;
 
-    if (isMouseOnStartPoint || isMouseOnEndPoint) {
+    if (isMouseOnStartPoint) {
       return {
-        id: isMouseOnStartPoint ? 1 : 2,
-        onCornorPoint: true,
-        point: {
-          x: isMouseOnStartPoint ? centerX1 : centerX2,
-          y: isMouseOnStartPoint ? centerY1 : centerY2,
+        point: 0,
+        coordinates: {
+          x: this.point.x1,
+          y: this.point.y1,
+        },
+      };
+    }
+
+    if (isMouseOnCenterPoint) {
+      return {
+        point: 1,
+        coordinates: {
+          x: this.point.cx,
+          y: this.point.cy,
+        },
+      };
+    }
+
+    if (isMouseOnEndPoint) {
+      return {
+        point: 2,
+        coordinates: {
+          x: this.point.x2,
+          y: this.point.y2,
         },
       };
     }
 
     return {
-      id: -1,
-      onCornorPoint: false,
-      point: {},
+      point: -1,
+      coordinates: {},
     };
   };
 
@@ -215,10 +246,12 @@ export class Line {
   };
 
   draw = (ctx) => {
+    const controlX = 2 * this.point.cx - 0.5 * (this.point.x1 + this.point.x2);
+    const controlY = 2 * this.point.cy - 0.5 * (this.point.y1 + this.point.y2);
+
     ctx.beginPath();
     ctx.moveTo(this.point.x1, this.point.y1);
-    ctx.lineTo(this.point.cx, this.point.cy);
-    ctx.lineTo(this.point.x2, this.point.y2);
+    ctx.quadraticCurveTo(controlX, controlY, this.point.x2, this.point.y2);
     ctx.strokeStyle = "black";
     ctx.stroke();
     ctx.closePath();
