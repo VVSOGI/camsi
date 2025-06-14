@@ -35,6 +35,11 @@ export class Line {
 
   onHover = (mousePosition, canvas) => {
     if (this.type === "curve") {
+      const distance = this.getDistanceFromCurve(mousePosition);
+
+      if (distance <= this.threshold) {
+        canvas.style.cursor = "move";
+      }
     }
 
     if (this.type === "line") {
@@ -69,21 +74,40 @@ export class Line {
         return;
       }
 
-      if (this.moveCornorPoint === 0) {
-        this.point.x1 = this.originPoint.x1 + x;
-        this.point.y1 = this.originPoint.y1 + y;
-        this.hoverEndpoint = { x: this.point.x1, y: this.point.y1 };
+      if (this.type === "curve") {
+        if (this.moveCornorPoint === 0) {
+          this.point.x1 = this.originPoint.x1 + x;
+          this.point.y1 = this.originPoint.y1 + y;
+          this.hoverEndpoint = { x: this.point.x1, y: this.point.y1 };
+        }
+
+        if (this.moveCornorPoint === 2) {
+          this.point.x2 = this.originPoint.x2 + x;
+          this.point.y2 = this.originPoint.y2 + y;
+          this.hoverEndpoint = { x: this.point.x2, y: this.point.y2 };
+        }
+
+        return;
       }
 
-      if (this.moveCornorPoint === 2) {
-        this.point.x2 = this.originPoint.x2 + x;
-        this.point.y2 = this.originPoint.y2 + y;
-        this.hoverEndpoint = { x: this.point.x2, y: this.point.y2 };
-      }
+      if (this.type === "line") {
+        if (this.moveCornorPoint === 0) {
+          this.point.x1 = this.originPoint.x1 + x;
+          this.point.y1 = this.originPoint.y1 + y;
+          this.hoverEndpoint = { x: this.point.x1, y: this.point.y1 };
+        }
 
-      this.point.cx = (this.point.x1 + this.point.x2) / 2;
-      this.point.cy = (this.point.y1 + this.point.y2) / 2;
-      return;
+        if (this.moveCornorPoint === 2) {
+          this.point.x2 = this.originPoint.x2 + x;
+          this.point.y2 = this.originPoint.y2 + y;
+          this.hoverEndpoint = { x: this.point.x2, y: this.point.y2 };
+        }
+
+        this.point.cx = (this.point.x1 + this.point.x2) / 2;
+        this.point.cy = (this.point.y1 + this.point.y2) / 2;
+
+        return;
+      }
     }
 
     this.point = {
@@ -101,7 +125,8 @@ export class Line {
   };
 
   isClicked = (mousePosition) => {
-    const distance = this.getDistanceFromLine(mousePosition);
+    const distance =
+      this.type === "curve" ? this.getDistanceFromCurve(mousePosition) : this.getDistanceFromLine(mousePosition);
     if (distance <= this.threshold) {
       const { point } = this.getMouseHitControlPoint(mousePosition);
       if (point > -1) {
@@ -191,6 +216,26 @@ export class Line {
 
   getDistanceFromCurve = (mousePosition) => {
     const { mouseX, mouseY } = mousePosition;
+
+    const controlX = MathUtils.getBezierControlPoint(0.5, this.point.cx, this.point.x1, this.point.x2);
+    const controlY = MathUtils.getBezierControlPoint(0.5, this.point.cy, this.point.y1, this.point.y2);
+
+    const dots = 100;
+    let minDistance = Infinity;
+
+    for (let i = 0; i <= dots; i++) {
+      const t = i / dots;
+      const curveX = MathUtils.getBezierCurve(t, this.point.x1, controlX, this.point.x2);
+      const curveY = MathUtils.getBezierCurve(t, this.point.y1, controlY, this.point.y2);
+
+      const distance = Math.sqrt(Math.pow(mouseX - curveX, 2) + Math.pow(mouseY - curveY, 2));
+
+      if (distance < minDistance) {
+        minDistance = distance;
+      }
+    }
+
+    return minDistance;
   };
 
   /**
