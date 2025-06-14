@@ -1,3 +1,5 @@
+import { MathUtils } from "../utils/index.js";
+
 export class Line {
   constructor(x1, y1, x2, y2) {
     this.type = "line";
@@ -32,10 +34,15 @@ export class Line {
   };
 
   onHover = (mousePosition, canvas) => {
-    const distance = this.getDistanceFromLine(mousePosition);
+    if (this.type === "curve") {
+    }
 
-    if (distance <= this.threshold) {
-      canvas.style.cursor = "move";
+    if (this.type === "line") {
+      const distance = this.getDistanceFromLine(mousePosition);
+
+      if (distance <= this.threshold) {
+        canvas.style.cursor = "move";
+      }
     }
 
     if (this.drag) {
@@ -182,6 +189,10 @@ export class Line {
     };
   };
 
+  getDistanceFromCurve = (mousePosition) => {
+    const { mouseX, mouseY } = mousePosition;
+  };
+
   /**
    * 직선의 방정식을 이용해서 마우스의 x, y 값이 직선으로부터 얼마나 떨어져있는지 확인
    */
@@ -246,8 +257,8 @@ export class Line {
   };
 
   draw = (ctx) => {
-    const controlX = 2 * this.point.cx - 0.5 * (this.point.x1 + this.point.x2);
-    const controlY = 2 * this.point.cy - 0.5 * (this.point.y1 + this.point.y2);
+    const controlX = MathUtils.getBezierControlPoint(0.5, this.point.cx, this.point.x1, this.point.x2);
+    const controlY = MathUtils.getBezierControlPoint(0.5, this.point.cy, this.point.y1, this.point.y2);
 
     ctx.beginPath();
     ctx.moveTo(this.point.x1, this.point.y1);
